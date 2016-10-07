@@ -14,8 +14,9 @@ public:
             , angle(0.5)
             , playerPos(1.5, 1.5)
             , angleDelta(0)
-            , moveDelta(0) {
-
+            , moveDelta(0)
+    {
+        ::readlevel();
         // http://www.areyep.com/RIPandMCS-TextureLibrary.html
         textureImg.load(":/textures.png");
         textureImg = textureImg.convertToFormat(QImage::Format_ARGB32);
@@ -96,7 +97,7 @@ public:
             int mapx = static_cast<int>(px);
             int mapy = static_cast<int>(py);
 
-            // пизоция и текстура для удара
+            // позиция и текстура для удара
             int texture = 0;
             qreal hitdist = 0.1;
             qreal texofs = 0;

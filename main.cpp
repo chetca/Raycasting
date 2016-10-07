@@ -14,8 +14,8 @@ int main(int argc, char **argv)
     Raycasting w;
     w.setWindowTitle("Raycasting");
 
-    w.showFullScreen();
-    //w.resize(780, 108);
+    //w.showFullScreen();
+    w.resize(800, 600);
     w.show();
 
 
