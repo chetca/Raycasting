@@ -5,7 +5,7 @@ WorldMap world_map;
 void readlevel(){
     std::ifstream in("level.map");
     int mapWidth, mapHeight; //размер карты
-    in >> mapHeight >> mapWidth;
+    in >> mapWidth >> mapHeight;
 
     world_map.resize(mapHeight);
     for(int i = 0; i < mapHeight; i++) {
@@ -14,3 +14,8 @@ void readlevel(){
             in >> world_map[i][j];
     }
 }
+/*
+*********Краткое русоводство по строению карт************
+mapWidth - ширина карты, mapHeight - высота карты. После
+сборки карта перевёрнута. Координата игрока - (1,1)
+*/

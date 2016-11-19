@@ -12,7 +12,7 @@ public:
     Raycasting(QWidget *parent = 0)
             : QWidget(parent)
             , angle(0.5)
-            , playerPos(1.5, 1.5)
+            , playerPos(48, 4)
             , angleDelta(0)
             , moveDelta(0)
     {
@@ -180,9 +180,9 @@ public:
 
             // потолок и пол
             for (; pixel1 > start; pixel1 -= stride)
-                *pixel1 = qRgb(0, 0, 0);
+                *pixel1 = qRgb(227, 227, 255); //известь
             for (; pixel2 < finish; pixel2 += stride)
-                *pixel2 = qRgb(96, 96, 96);
+                *pixel2 = qRgb(133, 133, 133); //полы
         }
 
         update();
