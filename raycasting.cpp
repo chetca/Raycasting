@@ -1,7 +1,7 @@
 #include "raycasting.h"
 
 void Raycasting::mouseMoveEvent(QMouseEvent *event) {
-    cursor().setPos(screenCentre);
+    //cursor().setPos(screenCentre);
 
     angleDelta = -(event->pos().x()-screenCentre.x())*sensitivity;
 
@@ -16,7 +16,6 @@ Raycasting::Raycasting(QWidget *parent )
         , moveDelta(0)
 {
     //this->resize(wWid,wHei);
-    ROT=0;
     ::readlevel();
     textureImg.load(":/textures.png");
     textureImg = textureImg.convertToFormat(QImage::Format_ARGB32);
@@ -32,18 +31,23 @@ Raycasting::Raycasting(QWidget *parent )
     cursor().bitmap();
 }
 
-void Raycasting::updatePlayer(bool rotate) {
+void Raycasting::updatePlayer() {
     int interval = qBound(20, watch.elapsed(), 250);
     watch.start();
     angle += angleDelta * interval / 1000;
     qreal step = moveDelta * interval / 1000;
+    qreal step2= moveDelta2* interval / 1000;
     qreal dx = cos(angle) * step;
     qreal dy = sin(angle) * step;
-    QPointF pos = playerPos + 3 * QPointF(dx, dy);
+    qreal dx2 =-sin(angle) * step2,
+          dy2 = cos(angle) * step2;
+
+    QPointF pos = playerPos + 3 * QPointF(dx, dy) + 3 * QPointF(dx2,dy2);
     int xi = static_cast<int>(pos.x());
     int yi = static_cast<int>(pos.y());
     if (world_map[yi][xi] == 0)
-        rotate==1?playerPos = playerPos + QPointF(-dy, dx):playerPos = playerPos + QPointF(dx, dy);
+        playerPos = playerPos + QPointF(dx, dy) + QPointF(dx2,dy2);
+        //rotate==1?playerPos = playerPos + QPointF(-dy, dx):playerPos = playerPos + QPointF(dx, dy);
 }
 
 void Raycasting::showFps() {
@@ -197,7 +201,7 @@ void Raycasting::render() {
 }
 
 void Raycasting::timerEvent(QTimerEvent *) {
-    updatePlayer(ROT);
+    updatePlayer();
     render();
     showFps();
 }
@@ -212,24 +216,20 @@ void Raycasting::keyPressEvent(QKeyEvent *event) {
     event->accept();
     if (event->key() == Qt::Key_A)//лево руля
     {
-        moveDelta = 2.5;
-        ROT=1;
+        moveDelta2 = 2.5;
     }
     if (event->key() == Qt::Key_D) //право руля
     {
-        moveDelta = -2.5;
-        ROT=1;
+        moveDelta2 = -2.5;
     }
     if (event->key() == Qt::Key_W) //вперёд
     {
         moveDelta = 2.5;
-        ROT=0;
     }
 
     if (event->key() == Qt::Key_S) //назад
     {
         moveDelta = -2.5;
-        ROT=0;
     }
     if (event->key() == Qt::Key_Escape)
         this->close();
@@ -239,10 +239,10 @@ void Raycasting::keyReleaseEvent(QKeyEvent *event) {
     event->accept();
     if (event->key() == Qt::Key_A)
        // angleDelta = (angleDelta > 0) ? 0 : angleDelta;
-        moveDelta = (moveDelta > 0) ? 0 : moveDelta;
+        moveDelta2 = (moveDelta2 > 0) ? 0 : moveDelta2;
     if (event->key() == Qt::Key_D)
       //  angleDelta = (angleDelta < 0) ? 0 : angleDelta;
-        moveDelta = (moveDelta < 0) ? 0 : moveDelta;
+        moveDelta2 = (moveDelta2 < 0) ? 0 : moveDelta2;
     if (event->key() == Qt::Key_W)
         moveDelta = (moveDelta > 0) ? 0 : moveDelta;
     if (event->key() == Qt::Key_S)
