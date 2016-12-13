@@ -27,7 +27,6 @@ public:
     void render();
 
 protected:
-
     void timerEvent(QTimerEvent*);
 
     void paintEvent(QPaintEvent *event);
@@ -35,8 +34,6 @@ protected:
     void keyPressEvent(QKeyEvent *event);
 
     void keyReleaseEvent(QKeyEvent *event);
-
-    void mouseMoveEvent(QMouseEvent *event);
 
 private:
     QTime watch;

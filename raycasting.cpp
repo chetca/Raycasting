@@ -1,13 +1,5 @@
 #include "raycasting.h"
 
-void Raycasting::mouseMoveEvent(QMouseEvent *event) {
-    //cursor().setPos(screenCentre);
-
-    angleDelta = -(event->pos().x()-screenCentre.x())*sensitivity;
-
-    cursor().setPos(screenCentre);
-}
-
 Raycasting::Raycasting(QWidget *parent )
         : QWidget(parent)
         , angle(0.5)
@@ -15,6 +7,10 @@ Raycasting::Raycasting(QWidget *parent )
         , angleDelta(0)
         , moveDelta(0)
 {
+    QCursor curs = cursor();
+    curs.setShape(Qt::BlankCursor);
+    setCursor(curs);
+
     //this->resize(wWid,wHei);
     ::readlevel();
     textureImg.load(":/textures.png");
@@ -201,6 +197,9 @@ void Raycasting::render() {
 }
 
 void Raycasting::timerEvent(QTimerEvent *) {
+    angleDelta = -(QCursor::pos().x()-screenCentre.x())*sensitivity;
+    QCursor::setPos(screenCentre);
+
     updatePlayer();
     render();
     showFps();
