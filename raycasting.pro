@@ -10,7 +10,8 @@ SOURCES = raycasting.cpp \
 RESOURCES += raycasting.qrc
 
 HEADERS += \
-    readlevel.h
+    readlevel.h \
+    raycasting.h
 
 DISTFILES += \
     level.map
