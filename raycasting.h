@@ -20,7 +20,7 @@ class Raycasting: public QWidget
 public:
     Raycasting(QWidget *parent = 0);
 
-    void updatePlayer();
+    void updatePlayer(bool rotate);
 
     void showFps();
 
@@ -46,10 +46,12 @@ private:
     QPointF playerPos;
     qreal angleDelta;
     qreal moveDelta;
-    //qreal moveDelta;
+    qreal rotateDelta;
     QImage textureImg;
     int textureCount;
+    bool ROT;
     const QPoint screenCentre = QApplication::desktop()->screenGeometry().center();
+
 };
 
 
