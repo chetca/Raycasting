@@ -1,5 +1,6 @@
 #include "readlevel.h"
 
+
 WorldMap world_map;
 
 void readlevel(){
@@ -7,9 +8,8 @@ void readlevel(){
     int mapWidth, mapHeight; //размер карты
     in >> mapWidth >> mapHeight;
 
-    world_map.resize(mapHeight);
+    world_map.resize(mapHeight, std::vector <int> (mapWidth,0));
     for(int i = 0; i < mapHeight; i++) {
-        world_map[i].resize(mapWidth);
         for(int j = 0; j < mapWidth; j++)
             in >> world_map[i][j];
     }

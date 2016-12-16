@@ -1,18 +1,22 @@
 #include "raycasting.h"
 
-Raycasting::Raycasting(QWidget *parent )
-        : QWidget(parent)
-        , angle(0.5)
-        , playerPos(48, 4)
-        , angleDelta(0)
-        , moveDelta(0)
+#include "readlevel.h"
+
+#include <QDebug>
+
+Raycasting::Raycasting(QWidget *parent) :
+    QWidget(parent),
+    angle(0.5),
+    playerPos(48, 4),
+    angleDelta(0),
+    moveDelta(0)
 {
     QCursor curs = cursor();
     curs.setShape(Qt::BlankCursor);
     setCursor(curs);
 
-    //this->resize(wWid,wHei);
     ::readlevel();
+
     textureImg.load(":/textures.png");
     textureImg = textureImg.convertToFormat(QImage::Format_ARGB32);
     Q_ASSERT(textureImg.width() == TEXTURE_SIZE * 2);
@@ -25,6 +29,10 @@ Raycasting::Raycasting(QWidget *parent )
     setMouseTracking(1);
     cursor().setPos(QApplication::desktop()->screenGeometry().center());
     cursor().bitmap();
+
+    FPS = new QLabel(this);
+    FPS->setGeometry(100,100,500,50);
+    FPS->show();//оно жжот
 }
 
 void Raycasting::updatePlayer() {
@@ -36,30 +44,28 @@ void Raycasting::updatePlayer() {
     qreal dx = cos(angle) * step;
     qreal dy = sin(angle) * step;
     qreal dx2 =-sin(angle) * step2,
-          dy2 = cos(angle) * step2;
+            dy2 = cos(angle) * step2;
 
     QPointF pos = playerPos + 3 * QPointF(dx, dy) + 3 * QPointF(dx2,dy2);
     int xi = static_cast<int>(pos.x());
     int yi = static_cast<int>(pos.y());
     if (world_map[yi][xi] == 0)
         playerPos = playerPos + QPointF(dx, dy) + QPointF(dx2,dy2);
-        //rotate==1?playerPos = playerPos + QPointF(-dy, dx):playerPos = playerPos + QPointF(dx, dy);
 }
 
 void Raycasting::showFps() {
     static QTime frameTick;
     static int totalFrame = 0;
-    QLabel FPS(this);
-    FPS.setGeometry(100,100,100,50);
     if (!(totalFrame & 31)) {
         int elapsed = frameTick.elapsed();
         frameTick.start();
         int fps = 32 * 1000 / (1 + elapsed);
-        FPS.setText(QString("(%1 FPS)").arg(fps));
-        FPS.setFont(QFont("Times", 40, QFont::Bold));
+        FPS->setText(QString("(%1 FPS)").arg(fps));
+        FPS->setFont(QFont("Times", 40, QFont::Bold));
         //FPS.show();
         //setWindowTitle(QString("Raycasting (%1 FPS)").arg(fps));
     }
+
     totalFrame++;
 }
 
@@ -213,65 +219,41 @@ void Raycasting::paintEvent(QPaintEvent *event) {
 
 void Raycasting::keyPressEvent(QKeyEvent *event) {
     event->accept();
-    if (event->key() == Qt::Key_A)//лево руля
-    {
-        moveDelta2 = 2.5;
-    }
-    if (event->key() == Qt::Key_D) //право руля
-    {
-        moveDelta2 = -2.5;
-    }
-    if (event->key() == Qt::Key_W) //вперёд
-    {
-        moveDelta = 2.5;
-    }
-
-    if (event->key() == Qt::Key_S) //назад
-    {
-        moveDelta = -2.5;
-    }
     if (event->key() == Qt::Key_Escape)
         this->close();
+
+    if (event->key() == Qt::Key_A){ //лево руля
+        moveDelta2 = PlayerSpeed;
+    }
+    if (event->key() == Qt::Key_D){ //право руля
+        moveDelta2 = -PlayerSpeed;
+    }
+    if (event->key() == Qt::Key_W && QGuiApplication::keyboardModifiers()==Qt::NoModifier){ //вперёд
+        moveDelta = PlayerSpeed;
+    }
+    if (event->key() == Qt::Key_S && QGuiApplication::keyboardModifiers()==Qt::NoModifier){ //назад
+        moveDelta = -PlayerSpeed;
+    }
+
+    if (event->key() == Qt::Key_W && QGuiApplication::keyboardModifiers()==Qt::ShiftModifier) {
+        moveDelta = runSpeed;
+    }
+
 }
 
 void Raycasting::keyReleaseEvent(QKeyEvent *event) {
     event->accept();
-    if (event->key() == Qt::Key_A)
-       // angleDelta = (angleDelta > 0) ? 0 : angleDelta;
-        moveDelta2 = (moveDelta2 > 0) ? 0 : moveDelta2;
-    if (event->key() == Qt::Key_D)
-      //  angleDelta = (angleDelta < 0) ? 0 : angleDelta;
-        moveDelta2 = (moveDelta2 < 0) ? 0 : moveDelta2;
-    if (event->key() == Qt::Key_W)
-        moveDelta = (moveDelta > 0) ? 0 : moveDelta;
-    if (event->key() == Qt::Key_S)
-        moveDelta = (moveDelta < 0) ? 0 : moveDelta;
-}
-/*
 
-void Raycasting::keyPressEvent(QKeyEvent *event) {
-    event->accept();
-    if (event->key() == Qt::Key_A)//лево руля
-        angleDelta = 1.3 * M_PI;
-    if (event->key() == Qt::Key_D) //право руля
-        angleDelta = -1.3 * M_PI;
-    if (event->key() == Qt::Key_W) //вперёд
-        moveDelta = 2.5;
-    if (event->key() == Qt::Key_S) //назад
-        moveDelta = -2.5;
-    if (event->key() == Qt::Key_Escape)
-        this->close();
-}
-
-void Raycasting::keyReleaseEvent(QKeyEvent *event) {
-    event->accept();
+    if (QGuiApplication::keyboardModifiers()==Qt::ShiftModifier) {
+        moveDelta = PlayerSpeed;
+    }
     if (event->key() == Qt::Key_A)
-        angleDelta = (angleDelta > 0) ? 0 : angleDelta;
+        moveDelta2 = 0;
     if (event->key() == Qt::Key_D)
-        angleDelta = (angleDelta < 0) ? 0 : angleDelta;
+        moveDelta2 = 0;
     if (event->key() == Qt::Key_W)
-        moveDelta = (moveDelta > 0) ? 0 : moveDelta;
+        moveDelta = 0;
     if (event->key() == Qt::Key_S)
-        moveDelta = (moveDelta < 0) ? 0 : moveDelta;
+        moveDelta = 0;
+
 }
-*/
