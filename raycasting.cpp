@@ -6,8 +6,8 @@
 
 Raycasting::Raycasting(QWidget *parent) :
     QWidget(parent),
-    angle(0.5),
-    playerPos(48, 4),
+    angle(1.5),
+    playerPos(47, 7),
     angleDelta(0),
     moveDelta(0)
 {
@@ -24,7 +24,7 @@ Raycasting::Raycasting(QWidget *parent) :
     textureCount = textureImg.height() / TEXTURE_SIZE;
 
     watch.start();
-    ticker.start(25, this);
+    ticker.start(5, this);
     setAttribute(Qt::WA_OpaquePaintEvent, true);
     setMouseTracking(1);
     cursor().setPos(QApplication::desktop()->screenGeometry().center());
@@ -33,6 +33,16 @@ Raycasting::Raycasting(QWidget *parent) :
     FPS = new QLabel(this);
     FPS->setGeometry(100,100,500,50);
     FPS->show();//оно жжот
+
+    PERS = new QLabel(this);
+    setPersToCentre();
+    PERS->setPixmap((QPixmap(":/za.png")));
+    PERS->show();
+}
+
+Raycasting::~Raycasting()
+{
+
 }
 
 void Raycasting::updatePlayer() {
@@ -44,7 +54,7 @@ void Raycasting::updatePlayer() {
     qreal dx = cos(angle) * step;
     qreal dy = sin(angle) * step;
     qreal dx2 =-sin(angle) * step2,
-            dy2 = cos(angle) * step2;
+          dy2 = cos(angle) * step2;
 
     QPointF pos = playerPos + 3 * QPointF(dx, dy) + 3 * QPointF(dx2,dy2);
     int xi = static_cast<int>(pos.x());
@@ -67,6 +77,48 @@ void Raycasting::showFps() {
     }
 
     totalFrame++;
+}
+
+void Raycasting::loadTexture(int bufh, QRgb *start, qreal texofs, qreal hitdist, QRgb *finish, int texture, bool dark, const QRgb *texsrc, int bufw, int ray, QRgb stride)
+{
+    int col = static_cast<int>(texofs * TEXTURE_SIZE);
+    col = qBound(0, col, TEXTURE_SIZE - 1);
+    texture = (texture - 1) % textureCount;
+    const QRgb *tex = texsrc + TEXTURE_BLOCK * texture * 2 +
+            (TEXTURE_SIZE * 2 * col);
+    if (dark)
+        tex += TEXTURE_SIZE;
+
+    // запуск из центра текстуры (по горизонтали)
+    int h = static_cast<int>(bufw / hitdist / 2);
+    int dy = (TEXTURE_SIZE << 12) / h;
+    int p1 = ((TEXTURE_SIZE / 2) << 12) - dy;
+    int p2 = p1 + dy;
+
+    // запуск с центра экрана (по вертикали)
+    // y1 будет идти вверх (уменьшение), у2 будет идти вниз (увеличение)
+    int y1 = bufh / 2;
+    int y2 = y1 + 1;
+    QRgb *pixel1 = start + y1 * stride + ray;
+    QRgb *pixel2 = pixel1 + stride;
+
+    // карта текстуры серого цвета
+    while (y1 >= 0 && y2 < bufh && p1 >= 0) {
+        *pixel1 = tex[p1 >> 12];
+        *pixel2 = tex[p2 >> 12];
+        p1 -= dy;
+        p2 += dy;
+        --y1;
+        ++y2;
+        pixel1 -= stride;
+        pixel2 += stride;
+    }
+
+    // потолок и пол
+    for (; pixel1 > start; pixel1 -= stride)
+        *pixel1 = qRgb(227, 227, 255); //известь
+    for (; pixel2 < finish; pixel2 += stride)
+        *pixel2 = qRgb(133, 133, 133);
 }
 
 void Raycasting::render() {
@@ -159,47 +211,16 @@ void Raycasting::render() {
 
         // получаем текстуру с учётом изображения на ней
         // различаем два вида одной текстуры: "normal" и "dark"
-        int col = static_cast<int>(texofs * TEXTURE_SIZE);
-        col = qBound(0, col, TEXTURE_SIZE - 1);
-        texture = (texture - 1) % textureCount;
-        const QRgb *tex = texsrc + TEXTURE_BLOCK * texture * 2 +
-                (TEXTURE_SIZE * 2 * col);
-        if (dark)
-            tex += TEXTURE_SIZE;
-
-        // запуск из центра текстуры (по горизонтали)
-        int h = static_cast<int>(bufw / hitdist / 2);
-        int dy = (TEXTURE_SIZE << 12) / h;
-        int p1 = ((TEXTURE_SIZE / 2) << 12) - dy;
-        int p2 = p1 + dy;
-
-        // запуск с центра экрана (по вертикали)
-        // y1 будет идти вверх (уменьшение), у2 будет идти вниз (увеличение)
-        int y1 = bufh / 2;
-        int y2 = y1 + 1;
-        QRgb *pixel1 = start + y1 * stride + ray;
-        QRgb *pixel2 = pixel1 + stride;
-
-        // карта текстуры серого цвета
-        while (y1 >= 0 && y2 < bufh && p1 >= 0) {
-            *pixel1 = tex[p1 >> 12];
-            *pixel2 = tex[p2 >> 12];
-            p1 -= dy;
-            p2 += dy;
-            --y1;
-            ++y2;
-            pixel1 -= stride;
-            pixel2 += stride;
-        }
-
-        // потолок и пол
-        for (; pixel1 > start; pixel1 -= stride)
-            *pixel1 = qRgb(227, 227, 255); //известь
-        for (; pixel2 < finish; pixel2 += stride)
-            *pixel2 = qRgb(133, 133, 133); //полы
+        loadTexture(bufh, start, texofs, hitdist, finish, texture, dark, texsrc, bufw, ray, stride);
     }
 
     update();
+}
+
+void Raycasting::setPersToCentre()
+{
+    qDebug() << this->width() << this->height();
+    PERS->setGeometry(0,this->height()-270,1900,500);
 }
 
 void Raycasting::timerEvent(QTimerEvent *) {
@@ -219,8 +240,9 @@ void Raycasting::paintEvent(QPaintEvent *event) {
 
 void Raycasting::keyPressEvent(QKeyEvent *event) {
     event->accept();
-    if (event->key() == Qt::Key_Escape)
-        this->close();
+    if (event->key() == Qt::Key_Escape) {
+        this->~Raycasting();
+    }
 
     if (event->key() == Qt::Key_A){ //лево руля
         moveDelta2 = PlayerSpeed;
@@ -245,7 +267,7 @@ void Raycasting::keyReleaseEvent(QKeyEvent *event) {
     event->accept();
 
     if (QGuiApplication::keyboardModifiers()==Qt::ShiftModifier) {
-        moveDelta = PlayerSpeed;
+        moveDelta = 0;
     }
     if (event->key() == Qt::Key_A)
         moveDelta2 = 0;
@@ -255,5 +277,9 @@ void Raycasting::keyReleaseEvent(QKeyEvent *event) {
         moveDelta = 0;
     if (event->key() == Qt::Key_S)
         moveDelta = 0;
+    if (event->key() == Qt::Key_W && QGuiApplication::keyboardModifiers()==Qt::ShiftModifier) {
+        moveDelta = 0;
+    }
+
 
 }

@@ -5,15 +5,15 @@
 #include <cmath>
 
 #include "raycasting.h"
+#include "menu.h"
 
 int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
 
-    Raycasting w;
+    Menu w;
 
-    w.setWindowTitle("Raycasting");
-    w.showFullScreen();
+    w.show();
 
     return app.exec();
 }

@@ -14,9 +14,12 @@ class Raycasting: public QWidget
     Q_OBJECT
 public:
     Raycasting(QWidget *parent = 0);
+    ~Raycasting();
     void updatePlayer();
     void showFps();
     void render();    
+    void setPersToCentre();
+    void loadTexture(int bufh, QRgb *start, qreal texofs, qreal hitdist, QRgb *finish, int texture, bool dark, const QRgb *texsrc, int bufw, int ray, QRgb stride);
 
 protected:
     void timerEvent(QTimerEvent*);
@@ -36,6 +39,7 @@ private:
     qreal rotateDelta;
     QImage textureImg;
     QLabel *FPS;
+    QLabel *PERS;
     int textureCount;
     const QPoint screenCentre = QApplication::desktop()->screenGeometry().center();
 

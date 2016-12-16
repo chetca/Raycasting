@@ -10,7 +10,7 @@ void readlevel(){
 
     world_map.resize(mapHeight, std::vector <int> (mapWidth,0));
     for(int i = 0; i < mapHeight; i++) {
-        for(int j = 0; j < mapWidth; j++)
+        for(int j = mapWidth-1; j>=0; j--)
             in >> world_map[i][j];
     }
 }

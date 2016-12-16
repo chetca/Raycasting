@@ -1,5 +1,6 @@
 <RCC>
-    <qresource prefix="/" >
+    <qresource prefix="/">
         <file>textures.png</file>
+        <file>za.png</file>
     </qresource>
 </RCC>
