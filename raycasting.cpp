@@ -34,10 +34,23 @@ Raycasting::Raycasting(QWidget *parent) :
     FPS->setGeometry(100,100,500,50);
     FPS->show();//оно жжот
 
-    PERS = new QLabel(this);
-    setPersToCentre();
-    PERS->setPixmap((QPixmap(":/za.png")));
-    PERS->show();
+    int SCREENWIDTH = QApplication::desktop()->screenGeometry().width();
+    int SCREENHEIGHT = QApplication::desktop()->screenGeometry().height();
+//    PERS = new QLabel(this);
+//    setPersToCentre();
+//    PERS->setPixmap((QPixmap(":/za.png")));
+//    PERS->show();
+
+    QPixmap *hands = new QPixmap(":/za.png");
+    LeftHand = new QLabel(this);
+    LeftHand->setPixmap(hands->copy(0,0,980,600).scaled(SCREENWIDTH/4,SCREENHEIGHT/3));
+    LeftHand->setGeometry(0,SCREENHEIGHT-SCREENHEIGHT/3,950,SCREENHEIGHT/3);
+    LeftHand->show();
+
+    RightHand = new QLabel(this);
+    RightHand->setPixmap(hands->copy(980,0,1900,600).scaled(SCREENWIDTH/3,SCREENHEIGHT/3));
+    RightHand->setGeometry(SCREENWIDTH-SCREENWIDTH/3,SCREENHEIGHT-SCREENHEIGHT/3,SCREENWIDTH/3,SCREENHEIGHT/3);
+    RightHand->show();
 }
 
 Raycasting::~Raycasting()
@@ -217,12 +230,6 @@ void Raycasting::render() {
     update();
 }
 
-void Raycasting::setPersToCentre()
-{
-    qDebug() << this->width() << this->height();
-    PERS->setGeometry(0,this->height()-270,1900,500);
-}
-
 void Raycasting::timerEvent(QTimerEvent *) {
     angleDelta = -(QCursor::pos().x()-screenCentre.x())*sensitivity;
     QCursor::setPos(screenCentre);
@@ -244,10 +251,10 @@ void Raycasting::keyPressEvent(QKeyEvent *event) {
         this->~Raycasting();
     }
 
-    if (event->key() == Qt::Key_A){ //лево руля
+    if (event->key() == Qt::Key_A){ //шаг влево
         moveDelta2 = PlayerSpeed;
     }
-    if (event->key() == Qt::Key_D){ //право руля
+    if (event->key() == Qt::Key_D){ //шаг вправо
         moveDelta2 = -PlayerSpeed;
     }
     if (event->key() == Qt::Key_W && QGuiApplication::keyboardModifiers()==Qt::NoModifier){ //вперёд

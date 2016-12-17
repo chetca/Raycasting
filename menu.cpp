@@ -18,7 +18,6 @@ void Menu::on_pushButton_clicked()
     Raycasting *w = new Raycasting;
     w->setWindowTitle("Raycasting");
     w->showFullScreen();
-    w->setPersToCentre();
 }
 
 void Menu::on_pushButton_2_clicked()

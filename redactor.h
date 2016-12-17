@@ -5,7 +5,8 @@
 #include <QLabel>
 #include <QGraphicsScene>
 #include <QGraphicsView>
-#include <QTextEdit>
+#include <QLineEdit>
+#include <vector>
 
 class Redactor : public QWidget
 {
@@ -16,29 +17,35 @@ public:
     enum MapUnit {
         Floor,
         Wall,
-        WoodWall,
-        Window,
-        Grass,
-        WarningGrass,
+        EWindow,
+        WWindow,
+        SStand,
         Stand,
+        InfStand,
         Door,
-        StoneWall
+        WhiteWoodDoor
     };
+private:
+    void keyPressEvent(QKeyEvent *event);
+    void mousePressEvent(QMouseEvent *event);
 
 signals:
 
 public slots:
 
 private:
-    QLabel labelWall;
-    QLabel labelDoor;
-    QLabel labelWWindow;
-    QLabel labelStand;
+    std::vector <std::vector <int> > mapMatrix;
+    int state;
+    QLabel *labelWall;
+    QLabel *labelDoor;
+    QLabel *labelWWindow;
+    QLabel *labelStand;
     QGraphicsScene *redactScene;
     QGraphicsView *view;
     int mapW,mapH;
-    QTextEdit *strMapW;
-    QTextEdit *strMapH;
+    QLineEdit *strMapW;
+    QLineEdit *strMapH;
+    int scaleSq;
 };
 
 #endif // REDACTOR_H

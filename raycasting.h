@@ -18,7 +18,6 @@ public:
     void updatePlayer();
     void showFps();
     void render();    
-    void setPersToCentre();
     void loadTexture(int bufh, QRgb *start, qreal texofs, qreal hitdist, QRgb *finish, int texture, bool dark, const QRgb *texsrc, int bufw, int ray, QRgb stride);
 
 protected:
@@ -40,6 +39,8 @@ private:
     QImage textureImg;
     QLabel *FPS;
     QLabel *PERS;
+    QLabel *LeftHand;
+    QLabel *RightHand;
     int textureCount;
     const QPoint screenCentre = QApplication::desktop()->screenGeometry().center();
 
